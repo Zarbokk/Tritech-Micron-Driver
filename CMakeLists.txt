@@ -112,27 +112,30 @@ include_directories(
 # )
 
 ## Declare a cpp executable (Micron Driver ROS node)
- add_executable(micron_driver_ros_node src/main.cpp src/Serial.cpp src/tritech_micron_driver.cpp)
+
+add_executable(micron_driver_ros_node src/main.cpp src/Serial.cpp src/tritech_micron_driver.cpp)
+target_link_libraries(micron_driver_ros_node
+        ${catkin_LIBRARIES}
+        boost_thread
+        )
+#add_dependencies(micron_driver_ros_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(micron_driver_ros_node micron_driver_ros_generate_messages_cpp)
 
 ## Declare a cpp executable (Micron Driver ROS node)
+
  add_executable(micron_driver_scanline_parser src/scan_line_converter_node.cpp )
 
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
+ target_link_libraries(micron_driver_scanline_parser
+   ${catkin_LIBRARIES}
+ )
+add_dependencies(micron_driver_scanline_parser ${catkin_EXPORTED_TARGETS})
+add_dependencies(micron_driver_scanline_parser micron_driver_ros_generate_messages_cpp)
+
+
+
+
+
 # add_dependencies(micron_driver_ROS_node micron_driver_ROS_generate_messages_cpp)
-
-## Specify libraries to link a library or executable target against
- target_link_libraries(micron_driver_ros_node 
-   ${catkin_LIBRARIES}
-	boost_thread
- )
-
-## Specify libraries to link a library or executable target against
- target_link_libraries(micron_driver_scanline_parser 
-   ${catkin_LIBRARIES}
- )
-
-
 #############
 ## Install ##
 #############
