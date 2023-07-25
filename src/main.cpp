@@ -72,30 +72,56 @@ public:
 
 	//Constructor
 	TritechMicron(ros::NodeHandle & nh) {
-	
+        sleep(2);
+//        std::cout << "test1" << std::endl;
+//        this->getparams(nh);
+//        std::cout << "test2" << std::endl;
 
-	 getparams(nh); 
-	
+        nh.getParam("/micron_driver/frame_id_", this->frame_id_);
+        nh.getParam("/micron_driver/port_", this->port_);
+        nh.getParam("/micron_driver/num_bins_", this->num_bins_);
+        nh.getParam("/micron_driver/range_", this->range_);
+        nh.getParam("/micron_driver/velocity_of_sound_", this->velocity_of_sound_);
+        nh.getParam("/micron_driver/angle_step_size_", this->angle_step_size_);
+        nh.getParam("/micron_driver/leftLimit_", this->leftLimit_);
+        nh.getParam("/micron_driver/rightLimit_", this->rightLimit_);
+        nh.getParam("/micron_driver/use_debug_mode", this->use_debug_mode);
+        nh.getParam("/micron_driver/simulate_", this->simulate_);
 
-	if ( !simulate_ )
-	{
-		scan_line_pub_ = nh.advertise<_ScanLineMsgType>( "scan_line", 1 );
 
-		driver_ = new TritechMicronDriver( num_bins_, range_, velocity_of_sound_,angle_step_size_, leftLimit_, rightLimit_,use_debug_mode );
-		reconfigserver = nh.advertiseService("Sonar_Reconfiguration", &TritechMicron::reconfig, this);
-		
 
-		driver_->registerScanLineCallback( std::bind( &TritechMicron::publish,this,std::placeholders::_1,  std::placeholders::_2,std::placeholders::_3 ) );
 
-    	uint8_t angle_step_size_byte = std::max(1, std::min(255, angle_step_size_));
+//        this->port_ = "/dev/ttyUSB0";
+//        frame_id_ = "Micron";
+//        num_bins_ = 200;
+//        range_ = 5;
+//        velocity_of_sound_ = 1500;
+//        angle_step_size_ = 32;
+//        leftLimit_ = 1;
+//        rightLimit_ = 6399;
+//        use_debug_mode = true;
+//        simulate_ = false;
 
-		if ( !driver_->connect( port_.c_str()) )
-		{
-			ROS_ERROR( "Could not connect to device; simulating instead." );
-			simulate_ = true;
-		}
+        if ( !simulate_ )
+        {
+//            std::cout << "test3" << std::endl;
+            scan_line_pub_ = nh.advertise<_ScanLineMsgType>( "scan_line", 1 );
 
-	}
+            driver_ = new TritechMicronDriver( num_bins_, range_, velocity_of_sound_,angle_step_size_, leftLimit_, rightLimit_,use_debug_mode );
+            reconfigserver = nh.advertiseService("Sonar_Reconfiguration", &TritechMicron::reconfig, this);
+
+//            std::cout << "test4" << std::endl;
+            driver_->registerScanLineCallback( std::bind( &TritechMicron::publish,this,std::placeholders::_1,  std::placeholders::_2,std::placeholders::_3 ) );
+
+            uint8_t angle_step_size_byte = std::max(1, std::min(255, angle_step_size_));
+//            std::cout << "test5" << std::endl;
+            if ( !driver_->connect( port_.c_str()) )
+            {
+                ROS_ERROR( "Could not connect to device; simulating instead." );
+//                simulate_ = true;
+            }
+//            std::cout << "test6" << std::endl;
+        }
 	} 
 
 	//Destructor
@@ -114,7 +140,7 @@ public:
 	{
 	 driver_->reconfigure(req.nbins,req.range, req.vos, req.angle_step_size, req.leftLimit, req.rightLimit);
 
-	return true; 
+	return true;
 	}
 
 	/* This function is a callback associated with the reception of a Scanline Message from the Sonar. 
@@ -145,13 +171,15 @@ public:
 	//This function queries the parameter server for the needed parameters. If not found, it uses the default values: 
 	bool getparams(ros::NodeHandle &nh) 
 	{
-		
-		if (nh.hasParam("/micron_driver/frame_id_")) 
+
+		if (nh.hasParam("/micron_driver/frame_id_"))
 			nh.getParam("/micron_driver/frame_id_", frame_id_);
 		else {
 	 		frame_id_ = "Micron";
 			ROS_WARN("Did not find frame_id on the parameter Server, using default value instead"); 
 		}
+
+
 
 		if (nh.hasParam("/micron_driver/port_")) 
 			nh.getParam("/micron_driver/port_", port_);
@@ -160,12 +188,14 @@ public:
 			ROS_WARN("Did not find port_ on the parameter Server, using default value instead"); 
 		}
 
+
 		if (nh.hasParam("/micron_driver/num_bins_")) 
 			nh.getParam("/micron_driver/num_bins_", num_bins_);
 		else {
 		 	num_bins_ = 200;
 			ROS_WARN("Did not find num_bins_ on the parameter Server, using default value instead"); 
 		}
+
 
 		if (nh.hasParam("/micron_driver/range_")) 
 			nh.getParam("/micron_driver/range_", range_);
@@ -174,33 +204,40 @@ public:
 			ROS_WARN("Did not find range_ on the parameter Server, using default value instead"); 
 		}
 
+
 		if (nh.hasParam("/micron_driver/velocity_of_sound_")) 
 			nh.getParam("/micron_driver/velocity_of_sound_", velocity_of_sound_);
 		else {
 			velocity_of_sound_ = 1500;
 			ROS_WARN("Did not find velocity_of_sound_ on the parameter Server, using default value instead"); 
 		}
-			 
-		if (nh.hasParam("/micron_driver/angle_step_size_")) 
+
+
+        if (nh.hasParam("/micron_driver/angle_step_size_"))
 			nh.getParam("/micron_driver/angle_step_size_", angle_step_size_);
 		else {
 			angle_step_size_ = 32;
 			ROS_WARN("Did not find angle_step_size_ on the parameter Server, using default value instead"); 
-		}	
+		}
+
 
 		if (nh.hasParam("/micron_driver/leftLimit_")) 
 			nh.getParam("/micron_driver/leftLimit_", leftLimit_);
 		else {
 			leftLimit_ = 1;
 			ROS_WARN("Did not find leftLimit_ on the parameter Server, using default value instead"); 
-		}	
+		}
 
-		if (nh.hasParam("/micron_driver/rightLimit_")) 
+
+
+
+        if (nh.hasParam("/micron_driver/rightLimit_"))
 			nh.getParam("/micron_driver/rightLimit_", rightLimit_);
 		else {
 			rightLimit_ = 6399;
 			ROS_WARN("Did not find rightLimit_ on the parameter Server, using default value instead"); 
-		}	
+		}
+
 
 		if (nh.hasParam("/micron_driver/use_debug_mode")) 
 			nh.getParam("/micron_driver/use_debug_mode", use_debug_mode);
@@ -216,98 +253,98 @@ public:
 			ROS_WARN("Did not find simulate_ on the parameter Server, using default value instead"); 
 		}
 
-		//Sonar simulation parameters 
+		//Sonar simulation parameters
 			if (nh.hasParam("/micron_driver/simulate_num_bins_")) nh.getParam("/micron_driver/simulate_num_bins_", simulate_num_bins_);
 		else {
-	 		simulate_num_bins_ = false; 
-			ROS_WARN("Did not find simulate_num_bins_ on the parameter Server, using default value instead"); 
-		}	
+	 		simulate_num_bins_ = false;
+			ROS_WARN("Did not find simulate_num_bins_ on the parameter Server, using default value instead");
+		}
 
 
-		if (nh.hasParam("/micron_driver/simulate_bin_distance_step_")) 
+		if (nh.hasParam("/micron_driver/simulate_bin_distance_step_"))
 			nh.getParam("/micron_driver/simulate_bin_distance_step_", simulate_bin_distance_step_);
 		else {
-	 		simulate_bin_distance_step_ = false; 
-			ROS_WARN("Did not find simulate_bin_distance_step_ on the parameter Server, using default value instead"); 
-		}	
-	
+	 		simulate_bin_distance_step_ = false;
+			ROS_WARN("Did not find simulate_bin_distance_step_ on the parameter Server, using default value instead");
+		}
 
-		if (nh.hasParam("/micron_driver/simulate_distance")) 
+
+		if (nh.hasParam("/micron_driver/simulate_distance"))
 			nh.getParam("/micron_driver/simulate_distance", simulate_distance);
 		else {
-	 		simulate_distance = false; 
-			ROS_WARN("Did not find simulate_distance on the parameter Server, using default value instead"); 
-		}	
+	 		simulate_distance = false;
+			ROS_WARN("Did not find simulate_distance on the parameter Server, using default value instead");
+		}
 
 
-		if (nh.hasParam("/micron_driver/simulate_intensity")) 
+		if (nh.hasParam("/micron_driver/simulate_intensity"))
 			nh.getParam("/micron_driver/simulate_intensity", simulate_intensity);
 		else {
-	 		simulate_intensity = false; 
-			ROS_WARN("Did not find simulate_intensity on the parameter Server, using default value instead"); 
-		}	
+	 		simulate_intensity = false;
+			ROS_WARN("Did not find simulate_intensity on the parameter Server, using default value instead");
+		}
 
 
-		if (nh.hasParam("/micron_driver/simulate_intensity_variance")) 
+		if (nh.hasParam("/micron_driver/simulate_intensity_variance"))
 			nh.getParam("/micron_driver/simulate_intensity_variance", simulate_intensity_variance);
 		else {
-	 		simulate_intensity_variance = false; 
-			ROS_WARN("Did not find simulate_intensity_variance on the parameter Server, using default value instead"); 
-		}	
+	 		simulate_intensity_variance = false;
+			ROS_WARN("Did not find simulate_intensity_variance on the parameter Server, using default value instead");
+		}
 
 
-		if (nh.hasParam("/micron_driver/simulate_use_manual_angle")) 
+		if (nh.hasParam("/micron_driver/simulate_use_manual_angle"))
 			nh.getParam("/micron_driver/simulate_use_manual_angle", simulate_use_manual_angle);
 		else {
-	 		simulate_use_manual_angle = false; 
-			ROS_WARN("Did not find simulate_use_manual_angle on the parameter Server, using default value instead"); 
-		}	
+	 		simulate_use_manual_angle = false;
+			ROS_WARN("Did not find simulate_use_manual_angle on the parameter Server, using default value instead");
+		}
 
 
-		if (nh.hasParam("/micron_driver/simulate_manual_angle")) 
+		if (nh.hasParam("/micron_driver/simulate_manual_angle"))
 			nh.getParam("/micron_driver/simulate_manual_angle", simulate_manual_angle);
 		else {
-	 		simulate_manual_angle = false; 
-			ROS_WARN("Did not find simulate_manual_angle on the parameter Server, using default value instead"); 
-		}	
+	 		simulate_manual_angle = false;
+			ROS_WARN("Did not find simulate_manual_angle on the parameter Server, using default value instead");
+		}
 
-
-		if (nh.hasParam("/micron_driver/simulate_scan_angle_velocity")) 
+        std::cout << "test1.1" << std::endl;
+		if (nh.hasParam("/micron_driver/simulate_scan_angle_velocity"))
 			nh.getParam("/micron_driver/simulate_scan_angle_velocity", simulate_scan_angle_velocity);
 		else {
-	 		simulate_scan_angle_velocity = false; 
-			ROS_WARN("Did not find simulate_scan_angle_velocity on the parameter Server, using default value instead"); 
-		}	
- 
+	 		simulate_scan_angle_velocity = false;
+			ROS_WARN("Did not find simulate_scan_angle_velocity on the parameter Server, using default value instead");
+		}
+        std::cout << "test1.2" << std::endl;
 
 	}
 
 
 
-void simulate()
-{
-	if ( !simulate_ ) return;
-
-	//This code simulates the sonar. 
-	static ros::Time last_time_;
-	ros::Time now = ros::Time::now();
-
-	_IntensityBinsRawType intensity_bins(simulate_num_bins_);
-	for ( int i = 0; i < simulate_num_bins_; ++i )
-	{
-		intensity_bins[i] = simulate_intensity * math_utils::normalizedGaussian( simulate_bin_distance_step_ * ( i + 1 ) - simulate_distance, simulate_intensity_variance );
-	}
-
-	publish(scan_angle, simulate_bin_distance_step_ ,intensity_bins );
-
-	if ( simulate_use_manual_angle ) scan_angle = simulate_manual_angle;
-	else scan_angle += simulate_scan_angle_velocity * ( now - last_time_ ).toSec();
-
-	scan_angle = scan_angle > 180.0 ? scan_angle - 360.0 : scan_angle < -180 ? scan_angle + 360 : scan_angle;
-
-	last_time_ = now;
-
-	}
+//void simulate()
+//{
+//	if ( !simulate_ ) return;
+//
+//	//This code simulates the sonar.
+//	static ros::Time last_time_;
+//	ros::Time now = ros::Time::now();
+//
+//	_IntensityBinsRawType intensity_bins(simulate_num_bins_);
+//	for ( int i = 0; i < simulate_num_bins_; ++i )
+//	{
+//		intensity_bins[i] = simulate_intensity * math_utils::normalizedGaussian( simulate_bin_distance_step_ * ( i + 1 ) - simulate_distance, simulate_intensity_variance );
+//	}
+//
+//	publish(scan_angle, simulate_bin_distance_step_ ,intensity_bins );
+//
+//	if ( simulate_use_manual_angle ) scan_angle = simulate_manual_angle;
+//	else scan_angle += simulate_scan_angle_velocity * ( now - last_time_ ).toSec();
+//
+//	scan_angle = scan_angle > 180.0 ? scan_angle - 360.0 : scan_angle < -180 ? scan_angle + 360 : scan_angle;
+//
+//	last_time_ = now;
+//
+//	}
 
 }; //End of class
 
@@ -319,9 +356,13 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "micron_driver");
 
 	ros::NodeHandle nh( "~" );
+
+
+    std::cout << "before " << std::endl;
 	TritechMicron tritech_micron( nh );
-	
-	ros::spin();
+    std::cout << "after " << std::endl;
+
+    ros::spin();
 	
 }
 

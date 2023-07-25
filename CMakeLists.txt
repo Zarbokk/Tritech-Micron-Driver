@@ -3,7 +3,7 @@ project(micron_driver_ros)
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+#set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CATKIN_ENABLE_TESTING OFF)
 
 ## Find catkin macros and libraries
