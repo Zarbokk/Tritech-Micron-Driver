@@ -105,7 +105,7 @@ public:
         if ( !simulate_ )
         {
 //            std::cout << "test3" << std::endl;
-            scan_line_pub_ = nh.advertise<_ScanLineMsgType>( "scan_line", 1 );
+            scan_line_pub_ = nh.advertise<_ScanLineMsgType>( "tritech_sonar/scan_line", 1 );
 
             driver_ = new TritechMicronDriver( num_bins_, range_, velocity_of_sound_,angle_step_size_, leftLimit_, rightLimit_,use_debug_mode );
             reconfigserver = nh.advertiseService("Sonar_Reconfiguration", &TritechMicron::reconfig, this);

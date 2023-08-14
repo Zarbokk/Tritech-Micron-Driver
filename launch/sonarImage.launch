@@ -1,0 +1,5 @@
+<launch>
+<!--Create a sonar driver node-->
+<node pkg="micron_driver_ros" type="conversionSonarData" name="conversionSonarData" output="screen" />
+
+</launch>
