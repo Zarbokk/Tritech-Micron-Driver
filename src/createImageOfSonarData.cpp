@@ -14,6 +14,8 @@
 double rotationOfSonarOnRobot = 200;
 cv::Mat sonarImage;
 ros::Publisher publisher;
+
+double lastAngle = 1;
 std::vector<double> linspace(double start_in, double end_in, int num_in) {
     if (num_in < 0) {
         std::cout << "number of linspace negative" << std::endl;
@@ -55,17 +57,22 @@ void imageDataGenerationCallback(const micron_driver_ros::ScanLine::ConstPtr &ms
     //sonarImage.at<uchar>(3,3) = 255;
 
     double linear_factor = ((double)msg->bins.size()) / ((double)sonarImage.size[0] / 2.0);
+    double stepSize = abs(msg->angle -lastAngle);//1;
+    lastAngle = msg->angle;
 
-    for(int i = 0 ; i<sonarImage.size[0]/2;i++){
+    for(int i = 1 ; i<sonarImage.size[0]/2;i++){
         double color=0;
         if (i<sonarImage.size[0]){
+
             color = msg->bins.at((int)(i * linear_factor - 1)).intensity;
         }
-        double stepSize = msg->bin_distance_step;//1;
+
+
+
         std::vector<double> linspaceVector = linspace(-stepSize/2,stepSize/2,10);
         for(const auto& value: linspaceVector) {
             //minus because of the coordinate change from z to top to z to bottom
-            double theta = 2 * M_PI * (msg->angle + value + rotationOfSonarOnRobot) / 400.0;
+            double theta = 2 * M_PI * (msg->angle + value + rotationOfSonarOnRobot) / 360.0;
             double x = i * cos(theta);
             double y = i * sin(theta);
             sonarImage.at<uchar>((int)(((double)sonarImage.size[0] / 2.0) - x)-1,(int)(((double)sonarImage.size[0] / 2.0) + y)-1) = color*1.2;
@@ -87,18 +94,20 @@ void imageDataGenerationCallback(const micron_driver_ros::ScanLine::ConstPtr &ms
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "conversionofsonardatatoimage");
+    ros::init(argc, argv, "conversionofsonardatatoimageMicron");
     ros::start();
     ros::NodeHandle n_;
     //has to be squared
     int sizeMat = 500;
     sonarImage = cv::Mat(sizeMat, sizeMat, CV_8UC1, cv::Scalar(0));
 
+    std::cout << "/1" << std::endl;
+    publisher = n_.advertise<sensor_msgs::Image>("/micron_driver/tritech_sonar/image", 10);
+    std::cout << "2" << std::endl;
 
-    publisher = n_.advertise<sensor_msgs::Image>("tritech_sonar/image", 10);
-
-    ros::Subscriber subscriberDataSonar = n_.subscribe("tritech_sonar/scan_line",1000,imageDataGenerationCallback);
+    ros::Subscriber subscriberDataSonar = n_.subscribe("/micron_driver/tritech_sonar/scan_line",1000,imageDataGenerationCallback);
 //    ros::Subscriber subscriberDataSonar = n_.subscribe("ping360_node/sonar/data",1000,imageDataGenerationCallback);
+    std::cout << "3" << std::endl;
 
     ros::spin();
     return 1;
