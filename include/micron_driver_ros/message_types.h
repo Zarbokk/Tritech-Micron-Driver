@@ -23,7 +23,8 @@
 
 #include <micron_driver_ros/tritech_micron_driver.h>
 #include <iostream>
-#include "ros/ros.h"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/logging.hpp"
 #include <vector>
 #include <bitset>
 #include <cmath>
@@ -244,7 +245,7 @@ namespace tritech
       msg[51] = angleStepSize;
 
       uint16_t leftLimGrads  = leftLimit;//std::min(6399, std::max(1, int(leftLimit  /*/ 360.0) * 0.01745 * 16*/)));
-	  ROS_INFO_STREAM("leftLimit"<<leftLimit);
+//      RCLCPP_INFO("leftLimit"<<leftLimit);
 
       msg[38] = leftLimit & 0x00FF;
       msg[39] = leftLimit >> 8;

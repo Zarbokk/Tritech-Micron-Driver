@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.3)
 project(micron_driver_ros)
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_STANDARD 20)
@@ -9,132 +9,63 @@ set(CATKIN_ENABLE_TESTING OFF)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
-  rospy 
-  message_generation
-        cv_bridge
-)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 find_package(OpenCV REQUIRED)
-
+find_package(builtin_interfaces REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(cv_bridge REQUIRED)
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS thread)
 
 
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
 
-################################################
-## Declare ROS messages, services and actions ##
-################################################
-
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependencies might have been
-##     pulled in transitively but can be declared for certainty nonetheless:
-##     * add a build_depend tag for "message_generation"
-##     * add a run_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
-
-## Generate messages in the 'msg' folder 
-add_message_files(
-   FILES
-   IntensityBin.msg
-   ScanLine.msg
- )
-
-## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   sonar_reconfig.srv
-   scanline_parser_reconfig.srv
- )
-
-## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
-
-## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs
- )
-
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if you package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-   INCLUDE_DIRS include
-#  LIBRARIES micron_driver_ROS
-   CATKIN_DEPENDS roscpp std_msgs
-   DEPENDS Boost thread
+rosidl_generate_interfaces( ${PROJECT_NAME}
+        "msg/IntensityBin.msg"
+        "msg/ScanLine.msg"
+        DEPENDENCIES builtin_interfaces
+        DEPENDENCIES std_msgs
+        DEPENDENCIES geometry_msgs
 )
 
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
 include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-)
-
-## Declare a cpp library
-# add_library(micron_driver_ROS
-#   src/${PROJECT_NAME}/micron_driver_ROS.cpp
-# )
-
-## Declare a cpp executable (Micron Driver ROS node)
 
 add_executable(micron_driver_ros_node src/main.cpp src/Serial.cpp src/tritech_micron_driver.cpp)
-target_link_libraries(micron_driver_ros_node
-        ${catkin_LIBRARIES}
-        boost_thread
-        )
-#add_dependencies(micron_driver_ros_node ${catkin_EXPORTED_TARGETS})
-add_dependencies(micron_driver_ros_node micron_driver_ros_generate_messages_cpp)
+ament_target_dependencies(micron_driver_ros_node rclcpp std_msgs)
+target_link_libraries(micron_driver_ros_node boost_thread)
+rosidl_target_interfaces(micron_driver_ros_node
+        ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
-## Declare a cpp executable (Micron Driver ROS node)
-
- add_executable(micron_driver_scanline_parser src/scan_line_converter_node.cpp )
-
- target_link_libraries(micron_driver_scanline_parser
-   ${catkin_LIBRARIES}
- )
-add_dependencies(micron_driver_scanline_parser ${catkin_EXPORTED_TARGETS})
-add_dependencies(micron_driver_scanline_parser micron_driver_ros_generate_messages_cpp)
+#target_include_directories(dvl_node
+#        PUBLIC
+#        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#        $<INSTALL_INTERFACE:include>)
 
 
-add_executable(conversionSonarData src/createImageOfSonarData.cpp)
-target_link_libraries(conversionSonarData ${catkin_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(conversionSonarData micron_driver_ros_generate_messages_cpp)
+add_executable(visualizationMicron src/createImageOfSonarData.cpp)
+ament_target_dependencies(visualizationMicron rclcpp std_msgs sensor_msgs cv_bridge)
+rosidl_target_interfaces(visualizationMicron
+        ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+
+install(TARGETS
+        micron_driver_ros_node
+        DESTINATION lib/${PROJECT_NAME}
+)
+#install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/)
+
+#install(DIRECTORY
+#        params
+#        DESTINATION share/${PROJECT_NAME}
+#)
+
+ament_export_dependencies(rosidl_default_runtime)
+
+ament_package()
+
 
 
