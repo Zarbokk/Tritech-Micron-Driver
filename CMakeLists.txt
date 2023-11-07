@@ -54,6 +54,7 @@ rosidl_target_interfaces(visualizationMicron
 
 install(TARGETS
         micron_driver_ros_node
+        visualizationMicron
         DESTINATION lib/${PROJECT_NAME}
 )
 #install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/)
