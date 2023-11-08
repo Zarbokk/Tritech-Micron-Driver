@@ -43,6 +43,7 @@ public:
 
         this->declare_parameter<bool>("/micron_driver/use_debug_mode", false);
         this->declare_parameter<bool>("/micron_driver/simulate_", false);
+        this->declare_parameter<bool>("/micron_driver/continuous_", true);
 
 
         frame_id_ = this->get_parameter("/micron_driver/frame_id_").as_string();
@@ -56,7 +57,7 @@ public:
 
         use_debug_mode = this->get_parameter("/micron_driver/use_debug_mode").as_bool();
         simulate_ = this->get_parameter("/micron_driver/simulate_").as_bool();
-
+        continuous_ = this->get_parameter("/micron_driver/continuous_").as_bool();
 
         this->scan_line_pub_ = this->create_publisher<micron_driver_ros::msg::ScanLine>("tritech_sonar/scan_lines", 4);
         driver_ = new TritechMicronDriver( this->num_bins_, this->range_, this->velocity_of_sound_, this->angle_step_size_, this->leftLimit_, this->rightLimit_, this->use_debug_mode);
@@ -171,9 +172,26 @@ public:
                    result.successful = true;
                }
            }
+           if(param.get_name() == "/micron_driver/continuous_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
+               {
+                   if(param.as_bool() == true)
+                   {
+                       continuous_ = true;
+                       contVal = 0x83;
+                   }
+                   else
+                   {
+                       continuous_ = false;
+                       contVal = 0x01;
+                   }
+                   result.successful = true;
+               }
+           }
        }
        if (result.successful == true){
-            driver_->reconfigure(num_bins_, range_, velocity_of_sound_, angle_step_size_, leftLimit_, rightLimit_);
+            driver_->reconfigure(num_bins_, range_, velocity_of_sound_, angle_step_size_, leftLimit_, rightLimit_, contVal);
        }
 
        return result;
@@ -240,7 +258,8 @@ public:
 	double simulate_manual_angle  ;
 	double simulate_scan_angle_velocity;
 	float scan_angle;
-
+    bool continuous_;
+    int contVal;
 	//Parameter reconfigure callback handle
 	OnSetParametersCallbackHandle::SharedPtr callback_handle_;
 
