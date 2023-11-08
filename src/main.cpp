@@ -27,129 +27,6 @@
 class TritechMicron : public rclcpp::Node
 {
 public: 
-	//Create publisher for the sonar scanlines
-    rclcpp::Publisher<micron_driver_ros::msg::ScanLine>::SharedPtr scan_line_pub_;
-
-	//Sonar parameters: Will be read from parameter server. 
-	std::string frame_id_ ;
-	std::string port_ ;
-	int num_bins_ ;
-	double range_;
-	double velocity_of_sound_; 
-	int angle_step_size_;
-	int leftLimit_; 
-	int rightLimit_; 
-	bool use_debug_mode; 
-	bool simulate_; 
-	TritechMicronDriver * driver_;
-
-	//Sonar simulation parameters
-	int simulate_num_bins_ ;
-	double simulate_bin_distance_step_; 
-	double simulate_distance;
-	int simulate_intensity;
-	double simulate_intensity_variance; 
-	bool simulate_use_manual_angle  ;
-	double simulate_manual_angle  ;
-	double simulate_scan_angle_velocity; 
-	float scan_angle;
-
-	//Parameter reconfigure callback handle
-	OnSetParametersCallbackHandle::SharedPtr callback_handle_;
-
-	rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters)
-   {
-       rcl_interfaces::msg::SetParametersResult result;
-       result.successful = false;
-       result.reason = "";
-
-       for(const auto &param : parameters)
-       {
-           if(param.get_name() == "/micron_driver/frame_id_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
-               {
-                   frame_id_ = param.as_string();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/port_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
-               {
-                   port_ = param.as_string();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/num_bins_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
-               {
-                   frame_id_ = param.as_int();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/range_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
-               {
-                   frame_id_ = param.as_double();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/velocity_of_sound_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
-               {
-                   frame_id_ = param.as_double();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/angle_step_size_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
-               {
-                   frame_id_ = param.as_int();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/leftLimit_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
-               {
-                   frame_id_ = param.as_int();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/rightLimit_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
-               {
-                   frame_id_ = param.as_int();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/use_debug_mode")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
-               {
-                   frame_id_ = param.as_bool();
-                   result.successful = true;
-               }
-           }
-           if(param.get_name() == "/micron_driver/simulate_")
-           {
-               if(param.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
-               {
-                   frame_id_ = param.as_bool();
-                   result.successful = true;
-               }
-           }
-       }
-       if (result.successful == true)
-            driver_->reconfigure(num_bins_, range_, velocity_of_sound_, angle_step_size_, leftLimit_, rightLimit_);
-       return result;
-   }
 
 	//Constructor
 	TritechMicron() : Node("micron_publisher") {
@@ -206,6 +83,101 @@ public:
 		}
 	}
 
+	rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters)
+   {
+       rcl_interfaces::msg::SetParametersResult result;
+       result.successful = false;
+       result.reason = "";
+
+       for(const auto &param : parameters)
+       {
+           if(param.get_name() == "/micron_driver/frame_id_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
+               {
+                   frame_id_ = param.as_string();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/port_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
+               {
+                   port_ = param.as_string();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/num_bins_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
+               {
+                   num_bins_ = param.as_int();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/range_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
+               {
+                   range_ = param.as_double();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/velocity_of_sound_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
+               {
+                   velocity_of_sound_ = param.as_double();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/angle_step_size_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
+               {
+                   angle_step_size_ = param.as_int();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/leftLimit_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
+               {
+                   leftLimit_ = param.as_int();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/rightLimit_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
+               {
+                   rightLimit_ = param.as_int();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/use_debug_mode")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
+               {
+                   use_debug_mode = param.as_bool();
+                   result.successful = true;
+               }
+           }
+           if(param.get_name() == "/micron_driver/simulate_")
+           {
+               if(param.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
+               {
+                   simulate_ = param.as_bool();
+                   result.successful = true;
+               }
+           }
+       }
+       if (result.successful == true){
+            driver_->reconfigure(num_bins_, range_, velocity_of_sound_, angle_step_size_, leftLimit_, rightLimit_);
+       }
+
+       return result;
+   }
 //	bool reconfig (micron_driver_ros::sonar_reconfig::Request &req,micron_driver_ros::sonar_reconfig::Response &resp )
 //	{
 //	 driver_->reconfigure(req.nbins,req.range, req.vos, req.angle_step_size, req.leftLimit, req.rightLimit);
@@ -239,7 +211,38 @@ public:
 			}
 //            this->scan_line_pub_->publish(sca)
 			this->scan_line_pub_->publish( scan_line_msg );
+
 		}
+
+		//Create publisher for the sonar scanlines
+    rclcpp::Publisher<micron_driver_ros::msg::ScanLine>::SharedPtr scan_line_pub_;
+
+	//Sonar parameters: Will be read from parameter server.
+	std::string frame_id_ ;
+	std::string port_ ;
+	int num_bins_ ;
+	double range_;
+	double velocity_of_sound_;
+	int angle_step_size_;
+	int leftLimit_;
+	int rightLimit_;
+	bool use_debug_mode;
+	bool simulate_;
+	TritechMicronDriver * driver_;
+
+	//Sonar simulation parameters
+	int simulate_num_bins_ ;
+	double simulate_bin_distance_step_;
+	double simulate_distance;
+	int simulate_intensity;
+	double simulate_intensity_variance;
+	bool simulate_use_manual_angle  ;
+	double simulate_manual_angle  ;
+	double simulate_scan_angle_velocity;
+	float scan_angle;
+
+	//Parameter reconfigure callback handle
+	OnSetParametersCallbackHandle::SharedPtr callback_handle_;
 
 }; //End of class
 
