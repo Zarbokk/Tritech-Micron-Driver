@@ -38,7 +38,7 @@ public:
 
         this->declare_parameter<double>("/micron_driver/velocity_of_sound_", 1500);
         this->declare_parameter<int>("/micron_driver/angle_step_size_", 32);
-        this->declare_parameter<int>("/micron_driver/leftLimit_", 1);
+        this->declare_parameter<int>("/micron_driver/leftLimit_", 0);
         this->declare_parameter<int>("/micron_driver/rightLimit_", 6399);
 
         this->declare_parameter<bool>("/micron_driver/use_debug_mode", false);
@@ -60,7 +60,7 @@ public:
         continuous_ = this->get_parameter("/micron_driver/continuous_").as_bool();
 
         this->scan_line_pub_ = this->create_publisher<micron_driver_ros::msg::ScanLine>("tritech_sonar/scan_lines", 4);
-        driver_ = new TritechMicronDriver( this->num_bins_, this->range_, this->velocity_of_sound_, this->angle_step_size_, this->leftLimit_, this->rightLimit_, this->use_debug_mode);
+        driver_ = new TritechMicronDriver( this->num_bins_, this->range_, this->velocity_of_sound_, this->angle_step_size_, this->leftLimit_, this->rightLimit_, this->contVal, this->use_debug_mode);
         driver_->registerScanLineCallback( std::bind( &TritechMicron::publish,this,std::placeholders::_1,  std::placeholders::_2,std::placeholders::_3 ) );
         uint8_t angle_step_size_byte = std::max(1, std::min(255, angle_step_size_));
 
@@ -259,7 +259,7 @@ public:
 	double simulate_scan_angle_velocity;
 	float scan_angle;
     bool continuous_;
-    int contVal;
+    int contVal = 0x83;
 	//Parameter reconfigure callback handle
 	OnSetParametersCallbackHandle::SharedPtr callback_handle_;
 
