@@ -28,12 +28,12 @@
 using namespace tritech;
 
 // ######################################################################
-TritechMicronDriver::TritechMicronDriver(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit, bool debugMode) :
+TritechMicronDriver::TritechMicronDriver(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit, int _contFlag, bool debugMode) :
   hasHeardMtAlive(false),hasHeardMtVersionData(false), hasHeardMtHeadData(false),itsDebugMode(debugMode),stateMachineSemaphore(green), state(waitingforMtAlive_1)
 { 
 
 resetMessage();   
-setParameters( _nBins,  _range,  _VOS,  _angleStepSize, _leftLimit, _rightLimit);
+setParameters( _nBins,  _range,  _VOS,  _angleStepSize, _leftLimit, _rightLimit, _contFlag);
 
 }
 
@@ -62,13 +62,14 @@ void TritechMicronDriver::disconnect()
 
 // ######################################################################
 
-void TritechMicronDriver::setParameters(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit) {
+void TritechMicronDriver::setParameters(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit, int _contFlag) {
    nBins = _nBins;
    range = _range;
    VOS = _VOS;
    angleStepSize = _angleStepSize;
    leftLimit= _leftLimit; 
    rightLimit= _rightLimit;
+   contFlag = _contFlag;
 }
 
 // ######################################################################
@@ -101,14 +102,14 @@ bool TritechMicronDriver::connect(std::string const& devName)
 // ######################################################################
 void TritechMicronDriver::configure()
 {
-  mtHeadCommandMsg headCommandMsg(nBins, range, VOS, angleStepSize, leftLimit, rightLimit);
+  mtHeadCommandMsg headCommandMsg(nBins, range, VOS, angleStepSize, leftLimit, rightLimit, contFlag);
   itsSerial.writeVector(headCommandMsg.construct());
 }
 
-void TritechMicronDriver::reconfigure(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit) 
+void TritechMicronDriver::reconfigure(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit, int _contFlag)
 {
 	//Load the new values
-	setParameters( _nBins,  _range,  _VOS,  _angleStepSize, _leftLimit, _rightLimit);
+	setParameters( _nBins,  _range,  _VOS,  _angleStepSize, _leftLimit, _rightLimit, _contFlag);
 	//Set the semaphore to red in order not to access the state variable at the same time 
 	stateMachineSemaphore = red;
 	//Set the state variable to configure 

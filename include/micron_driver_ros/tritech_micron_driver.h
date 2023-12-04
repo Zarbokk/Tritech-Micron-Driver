@@ -38,8 +38,9 @@ class TritechMicronDriver
     uint8_t angleStepSize;
     int leftLimit; 
 	int rightLimit;
+	int contFlag;
 
-    TritechMicronDriver(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit, bool debugMode = true);
+    TritechMicronDriver(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit, int _contFlag = 0x83, bool debugMode = true);
 
     ~TritechMicronDriver();
 
@@ -59,7 +60,7 @@ class TritechMicronDriver
     void resetMessage();
 	
 	//This function allows the user to reconfigure the sonar once it is running without restarting the driver
-	void										 reconfigure(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit);
+	void reconfigure(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit, int _contFlag);
 
     //! Get access to the scan lines that have been read by the sonar.
     /*! Note that this method is thread safe and will lock the internal scan
@@ -75,7 +76,7 @@ class TritechMicronDriver
   private:
 
 	//! This function sets the necessary parameters for the Sonar operation.
-	void setParameters(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit);
+	void setParameters(uint16_t _nBins, float _range, float _VOS, uint8_t _angleStepSize, int _leftLimit, int _rightLimit, int _contFlag);
 
     //! Process a single incoming byte (add it onto itsRawMsg, etc.)
     void processByte(uint8_t byte);

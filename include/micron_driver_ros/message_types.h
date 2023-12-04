@@ -202,8 +202,8 @@ namespace tritech
   // ######################################################################
   struct mtHeadCommandMsg
   {
-    mtHeadCommandMsg(uint16_t _nBins = 200, float _range = 10, float _VOS = 1500, uint8_t _angleStepSize=32, int _leftLimit=1, int _rightLimit=6399) :
-      nBins(_nBins), range(_range), VOS(_VOS), angleStepSize(_angleStepSize),leftLimit(_leftLimit),rightLimit(_rightLimit)
+    mtHeadCommandMsg(uint16_t _nBins = 200, float _range = 10, float _VOS = 1500, uint8_t _angleStepSize=32, int _leftLimit=1, int _rightLimit=6399, uint8_t _contFlag = 0x83) :
+      nBins(_nBins), range(_range), VOS(_VOS), angleStepSize(_angleStepSize),leftLimit(_leftLimit),rightLimit(_rightLimit), contFlag(_contFlag)
     { }
 
     //! The desired number of bins per scanline
@@ -217,6 +217,9 @@ namespace tritech
 
     int leftLimit;
     int rightLimit;
+
+    //! Continuous or sector scan
+    int contFlag;
 
     //! The size of each step of the sonar head
     /*! CrazyLow: 7.2°   = 128
@@ -232,7 +235,7 @@ namespace tritech
     {
       // Notice there is a padded byte at the beginning that we'll need to get rid of before we return this vector
       std::vector<uint8_t> msg = {
-        0x00, 0x40, 0x30, 0x30, 0x34, 0x43, 0x4C, 0x00, 0xFF, 0x02, 0x47, 0x13, 0x80, 0x02, 0x1D, 0x83, 0x23, 0x02,
+        0x00, 0x40, 0x30, 0x30, 0x34, 0x43, 0x4C, 0x00, 0xFF, 0x02, 0x47, 0x13, 0x80, 0x02, 0x1D, contFlag, 0x23, 0x02,
         0x99, 0x99, 0x99, 0x02, 0x66, 0x66, 0x66, 0x05, 0xA3, 0x70, 0x3D, 0x06, 0x70, 0x3D, 0x0A, 0x09, 0x28,
         0x00, 0x3C, 0x00, 0x01, 0x00, 0xFF, 0x18, 0x51, 0x08, 0x54, 0x54, 0x5A, 0x00, 0x7D, 0x00, 0x19, 0x10,
         0x8D, 0x00, 0x5A, 0x00, 0xE8, 0x03, 0x97, 0x03, 0x40, 0x06, 0x01, 0x00, 0x00, 0x00, 0x50, 0x51, 0x09,
@@ -385,21 +388,21 @@ namespace tritech
 
 			std::bitset<16> headCtrl = msg.data[19] | (uint16_t(msg.data[20]) << 8);
 			headControl.adc8on       = headCtrl[0];          
-      headControl.cont         = headCtrl[1];                     
-      headControl.scanright    = headCtrl[2];                           
-      headControl.invert       = headCtrl[3];                                    
-      headControl.motoroff     = headCtrl[4];                                           
-      headControl.txoff        = headCtrl[5];                                                     
-      headControl.spare        = headCtrl[6];                                                               
-      headControl.chan2        = headCtrl[7];                                                                         
-      headControl.raw          = headCtrl[8];
-      headControl.hasMotor     = headCtrl[9];
-      headControl.applyOffset  = headCtrl[10];
-      headControl.pingPong     = headCtrl[11];
-      headControl.starteLLim   = headCtrl[12];
-      headControl.replyASL     = headCtrl[13];
-      headControl.replyThr     = headCtrl[14];
-      headControl.ignoreSensor = headCtrl[15];
+            headControl.cont         = headCtrl[1];
+            headControl.scanright    = headCtrl[2];
+            headControl.invert       = headCtrl[3];
+            headControl.motoroff     = headCtrl[4];
+            headControl.txoff        = headCtrl[5];
+            headControl.spare        = headCtrl[6];
+            headControl.chan2        = headCtrl[7];
+            headControl.raw          = headCtrl[8];
+            headControl.hasMotor     = headCtrl[9];
+            headControl.applyOffset  = headCtrl[10];
+            headControl.pingPong     = headCtrl[11];
+            headControl.starteLLim   = headCtrl[12];
+            headControl.replyASL     = headCtrl[13];
+            headControl.replyThr     = headCtrl[14];
+            headControl.ignoreSensor = headCtrl[15];
 
 			rangeScale = ((uint16_t(msg.data[21]) | (uint16_t(msg.data[22]) << 8)) & 0xC0FF)/10;
 			uint8_t rangeTp = uint8_t(msg.data[22]) >> 6;
