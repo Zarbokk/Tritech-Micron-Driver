@@ -6,7 +6,7 @@
 #include "sensor_msgs/msg/image.h"
 #include <cv_bridge/cv_bridge.h>
 
-double rotationOfSonarOnRobot = 200;//maybe in rad
+double rotationOfSonarOnRobot = 0;//maybe in rad
 cv::Mat sonarImage;
 rclcpp::Node::SharedPtr g_node = nullptr;
 rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisherSonarImage;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     auto subscription =
             g_node->create_subscription<micron_driver_ros::msg::ScanLine>("/tritech_sonar/scan_lines", qos, imageDataGenerationCallback);
 //    node->create_subscription<ping360_sonar_msgs::msg::SonarEcho>("scan_echo", qos,std::bind(&imageDataGenerationCallback,std::placeholders::_1));
-    publisherSonarImage = g_node->create_publisher<sensor_msgs::msg::Image>("micron/image", 10);
+    publisherSonarImage = g_node->create_publisher<sensor_msgs::msg::Image>("micron/image2", 10);
 
     rclcpp::spin(g_node);
 
