@@ -86,12 +86,14 @@ public:
 
 	rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters)
    {
+//       std::cout << "Param Callback Started: " << std::endl;
        rcl_interfaces::msg::SetParametersResult result;
        result.successful = false;
        result.reason = "";
 
        for(const auto &param : parameters)
        {
+//           std::cout << param << std::endl;
            if(param.get_name() == "/micron_driver/frame_id_")
            {
                if(param.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
@@ -191,6 +193,7 @@ public:
            }
        }
        if (result.successful == true){
+//           std::cout << "doing reconfigure now: " << std::endl;
             driver_->reconfigure(num_bins_, range_, velocity_of_sound_, angle_step_size_, leftLimit_, rightLimit_, contVal);
        }
 
